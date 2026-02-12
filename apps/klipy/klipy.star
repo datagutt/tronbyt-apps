@@ -5,10 +5,13 @@ Description: Display trending or search GIFs from the Klipy API. Shows viral/pop
 Author: datagutt
 """
 
+load("assets/klipy_logo.png", KLIPY_LOGO_ASSET = "file")
 load("http.star", "http")
 load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
+
+KLIPY_LOGO = KLIPY_LOGO_ASSET.readall()
 
 KLIPY_BASE = "https://api.klipy.com/api/v1"
 LIST_TTL = 1800  # 30 min cache for GIF lists
@@ -28,8 +31,9 @@ def main(config):
                     main_align = "center",
                     cross_align = "center",
                     children = [
-                        render.Text("KLIPY", font = "6x13", color = "#FF6B6B"),
-                        render.Text("Set API key", font = "tom-thumb", color = "#888888"),
+                        render.Image(src = KLIPY_LOGO, height = 12 if not canvas.is2x() else 24),
+                        render.Box(height = 2, width = 1),
+                        render.Text("Set API key", font = "tom-thumb" if not canvas.is2x() else "terminus-12", color = "#888888"),
                     ],
                 ),
             ),
@@ -81,13 +85,40 @@ def main(config):
     if img_res.status_code != 200:
         return render_error("Image load failed")
 
+    scale = 2 if canvas.is2x() else 1
+    w = canvas.width()
+    h = canvas.height()
+    bar_h = 7 * scale
+
     return render.Root(
-        child = render.Box(
-            child = render.Image(
-                src = img_res.body(),
-                width = canvas.width(),
-                height = canvas.height(),
-            ),
+        child = render.Column(
+            children = [
+                render.Box(
+                    width = w,
+                    height = h - bar_h,
+                    child = render.Image(
+                        src = img_res.body(),
+                        width = w,
+                        height = h - bar_h,
+                    ),
+                ),
+                render.Box(
+                    width = w,
+                    height = bar_h,
+                    color = "#000000",
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "center",
+                        cross_align = "center",
+                        children = [
+                            render.Image(
+                                src = KLIPY_LOGO,
+                                height = bar_h - 2 * scale,
+                            ),
+                        ],
+                    ),
+                ),
+            ],
         ),
     )
 
@@ -171,8 +202,8 @@ def get_schema():
             ),
             schema.Text(
                 id = "search_query",
-                name = "Search Query",
-                desc = "Search for specific GIFs. Leave empty for trending.",
+                name = "Search KLIPY",
+                desc = "Search KLIPY for specific GIFs. Leave empty for trending.",
                 icon = "magnifyingGlass",
                 default = "",
             ),
