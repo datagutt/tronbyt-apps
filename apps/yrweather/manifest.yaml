@@ -1,0 +1,10 @@
+---
+id: yr-weather
+name: YR Weather
+summary: Weather from YR/MET.no
+desc: Display weather from the Norwegian Meteorological Institute. Supports Locationforecast (global) and Nowcast (Nordic area). Shows temperature, conditions, wind speed, and precipitation.
+author: datagutt
+fileName: yr_weather.star
+packageName: yrweather
+recommendedInterval: 15
+supports2x: true
