@@ -7,7 +7,7 @@ Author: datagutt
 
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 KLIPY_BASE = "https://api.klipy.com/api/v1"
@@ -85,8 +85,8 @@ def main(config):
         child = render.Box(
             child = render.Image(
                 src = img_res.body(),
-                width = 64,
-                height = 32,
+                width = canvas.width(),
+                height = canvas.height(),
             ),
         ),
     )
@@ -143,7 +143,7 @@ def render_error(msg):
                 children = [
                     render.Text("KLIPY", font = "tom-thumb", color = "#FF6B6B"),
                     render.Marquee(
-                        width = 64,
+                        width = canvas.width(),
                         child = render.Text(msg, font = "tom-thumb", color = "#FFAA00"),
                     ),
                 ],
