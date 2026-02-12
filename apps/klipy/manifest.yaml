@@ -1,0 +1,9 @@
+---
+id: klipy
+name: Klipy GIFs
+summary: Trending & search GIFs
+desc: Display trending or search GIFs from the Klipy API. Shows viral/popular GIFs by default, or configure a search query to find specific GIFs.
+author: datagutt
+fileName: klipy.star
+packageName: klipy
+recommendedInterval: 5
