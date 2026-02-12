@@ -306,9 +306,10 @@ def search_stops(pattern):
         props = feature.get("properties", {})
         fid = props.get("id", "")
         if fid.startswith("NSR:StopPlace"):
+            label = props.get("label", props.get("name", ""))
             options.append(
                 schema.Option(
-                    display = props.get("name", ""),
+                    display = label,
                     value = fid,
                 ),
             )
