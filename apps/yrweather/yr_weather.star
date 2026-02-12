@@ -146,63 +146,84 @@ def main(config):
     )
 
 # ---------------------------------------------------------------------------
-# Weather type mapping
+# Weather lookup tables
 # ---------------------------------------------------------------------------
 
-def get_weather_type(symbol_code):
-    """Get simplified weather type for animation selection."""
+# Exact symbol code -> (display text, color)
+CONDITIONS_EXACT = {
+    "clearsky": ("Clear sky", "#FFD700"),
+    "fair": ("Fair", "#FFE4B5"),
+    "partlycloudy": ("Partly cloudy", "#B0B0B0"),
+    "cloudy": ("Cloudy", "#808080"),
+    "fog": ("Fog", "#696969"),
+}
+
+# Substring matches checked in order (first match wins) -> (display text, color)
+CONDITIONS_PATTERN = [
+    ("thunder", "Thunder", "#FF4500"),
+    ("heavysnow", "Heavy snow", "#E8E8FF"),
+    ("lightsnow", "Light snow", "#F0F0F0"),
+    ("snow", "Snow", "#E8E8E8"),
+    ("heavysleet", "Heavy sleet", "#5F9EA0"),
+    ("sleet", "Sleet", "#87CEEB"),
+    ("heavyrain", "Heavy rain", "#1E3A8A"),
+    ("lightrain", "Light rain", "#6495ED"),
+    ("rain", "Rain", "#4169E1"),
+]
+
+# Exact symbol code -> animation type
+ANIM_TYPE_EXACT = {
+    "fog": "fog",
+    "cloudy": "cloudy",
+    "partlycloudy": "cloudy",
+    "clearsky": "clear",
+    "fair": "clear",
+}
+
+# Substring matches checked in order -> animation type
+ANIM_TYPE_PATTERN = [
+    ("thunder", "thunder"),
+    ("snow", "snow"),
+    ("sleet", "sleet"),
+    ("rain", "rain"),
+]
+
+# Animation type -> frame generator function
+ANIM_GENERATORS = {
+    "rain": lambda w, h, n, s: rain_frames(w, h, n, s),
+    "thunder": lambda w, h, n, s: thunder_frames(w, h, n, s),
+    "snow": lambda w, h, n, s: snow_frames(w, h, n, s),
+    "sleet": lambda w, h, n, s: sleet_frames(w, h, n, s),
+    "fog": lambda w, h, n, s: fog_frames(w, h, n, s),
+    "cloudy": lambda w, h, n, s: cloud_frames(w, h, n, s),
+    "clear": lambda w, h, n, s: clear_frames(w, h, n, s),
+}
+
+def strip_time_suffix(symbol_code):
+    """Strip _day/_night/_polartwilight suffix from a YR symbol code."""
     code = symbol_code
     for suffix in ["_day", "_night", "_polartwilight"]:
         code = code.replace(suffix, "")
-    if "thunder" in code:
-        return "thunder"
-    if "snow" in code:
-        return "snow"
-    if "sleet" in code:
-        return "sleet"
-    if "rain" in code:
-        return "rain"
-    if code == "fog":
-        return "fog"
-    if code in ["cloudy", "partlycloudy"]:
-        return "cloudy"
-    if code in ["clearsky", "fair"]:
-        return "clear"
+    return code
+
+def get_weather_type(symbol_code):
+    """Get simplified weather type for animation selection."""
+    code = strip_time_suffix(symbol_code)
+    if code in ANIM_TYPE_EXACT:
+        return ANIM_TYPE_EXACT[code]
+    for pattern, anim_type in ANIM_TYPE_PATTERN:
+        if pattern in code:
+            return anim_type
     return "default"
 
 def get_condition(symbol_code):
     """Map YR symbol code to display text and color."""
-    code = symbol_code
-    for suffix in ["_day", "_night", "_polartwilight"]:
-        code = code.replace(suffix, "")
-    if "thunder" in code:
-        return ("Thunder", "#FF4500")
-    if code == "clearsky":
-        return ("Clear sky", "#FFD700")
-    if code == "fair":
-        return ("Fair", "#FFE4B5")
-    if code == "partlycloudy":
-        return ("Partly cloudy", "#B0B0B0")
-    if code == "cloudy":
-        return ("Cloudy", "#808080")
-    if code == "fog":
-        return ("Fog", "#696969")
-    if "heavysnow" in code:
-        return ("Heavy snow", "#E8E8FF")
-    if "lightsnow" in code:
-        return ("Light snow", "#F0F0F0")
-    if "snow" in code:
-        return ("Snow", "#E8E8E8")
-    if "heavysleet" in code:
-        return ("Heavy sleet", "#5F9EA0")
-    if "sleet" in code:
-        return ("Sleet", "#87CEEB")
-    if "heavyrain" in code:
-        return ("Heavy rain", "#1E3A8A")
-    if "lightrain" in code:
-        return ("Light rain", "#6495ED")
-    if "rain" in code:
-        return ("Rain", "#4169E1")
+    code = strip_time_suffix(symbol_code)
+    if code in CONDITIONS_EXACT:
+        return CONDITIONS_EXACT[code]
+    for pattern, text, color in CONDITIONS_PATTERN:
+        if pattern in code:
+            return (text, color)
     if code:
         return (code, "#FFFFFF")
     return ("Unknown", "#FFFFFF")
@@ -212,21 +233,10 @@ def get_condition(symbol_code):
 # ---------------------------------------------------------------------------
 
 def make_weather_frames(weather_type, w, h, n, scale):
-    """Dispatch to the right animation generator."""
-    if weather_type == "rain":
-        return rain_frames(w, h, n, scale)
-    if weather_type == "thunder":
-        return thunder_frames(w, h, n, scale)
-    if weather_type == "snow":
-        return snow_frames(w, h, n, scale)
-    if weather_type == "sleet":
-        return sleet_frames(w, h, n, scale)
-    if weather_type == "fog":
-        return fog_frames(w, h, n, scale)
-    if weather_type == "cloudy":
-        return cloud_frames(w, h, n, scale)
-    if weather_type == "clear":
-        return clear_frames(w, h, n, scale)
+    """Dispatch to the right animation generator via lookup table."""
+    generator = ANIM_GENERATORS.get(weather_type)
+    if generator:
+        return generator(w, h, n, scale)
     return default_frames(w, h, n)
 
 def particle(x, y, pw, ph, color):
