@@ -1,0 +1,10 @@
+---
+id: entur
+name: Entur
+summary: Norway transit departures
+desc: Displays real-time public transit departures for any stop in Norway using the Entur API. Shows line numbers, destinations, and countdown times with transport mode color coding.
+author: datagutt
+fileName: entur.star
+packageName: entur
+recommendedInterval: 15
+supports2x: true
