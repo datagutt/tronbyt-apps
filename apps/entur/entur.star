@@ -293,7 +293,7 @@ def search_stops(pattern):
         "ET-Client-Name": CLIENT_NAME,
     }
     rep = http.get(
-        GEOCODER_URL + "?text=" + pattern + "&size=10&lang=no",
+        GEOCODER_URL + "?text=" + pattern + "&size=10&lang=no&layers=venue",
         headers = headers,
         ttl_seconds = GEOCODER_TTL,
     )
