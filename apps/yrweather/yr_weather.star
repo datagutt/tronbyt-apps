@@ -431,7 +431,7 @@ def fog_frames(w, h, n, scale):
             # Pulse alpha slightly
             pulse = ((f * 3 + y_base) % 8)
             a = alpha_base + (pulse if pulse < 4 else 8 - pulse) * 3
-            ahex = "%02x" % min(a, 255)
+            ahex = hex02(min(a, 255))
 
             vis_x = max(0, x)
             vis_w = min(bw, w - vis_x)
@@ -529,7 +529,7 @@ def clear_frames(w, h, n, scale):
             max(0, sun_y - 4 * s),
             min(glow_r * 2, w - max(0, sun_x - 4 * s)),
             glow_r * 2,
-            "#FFD700" + "%02x" % (a // 3),
+            "#FFD700" + hex02(a // 3),
         ))
 
         # Mid glow
@@ -539,15 +539,15 @@ def clear_frames(w, h, n, scale):
             max(0, sun_y - 2 * s),
             min(mid_r * 2, w - max(0, sun_x - 2 * s)),
             mid_r * 2,
-            "#FFD700" + "%02x" % (a * 2 // 3),
+            "#FFD700" + hex02(a * 2 // 3),
         ))
 
         # Sun core
-        parts.append(p(sun_x, sun_y, sun_r * 2, sun_r * 2, "#FFD700" + "%02x" % min(a + 30, 200)))
+        parts.append(p(sun_x, sun_y, sun_r * 2, sun_r * 2, "#FFD700" + hex02(min(a + 30, 200))))
 
         # Rays extending from sun (4 diagonal directions)
         ray_len = (3 + (cycle % 4)) * s
-        ray_color = "#FFD700" + "%02x" % (a // 2)
+        ray_color = "#FFD700" + hex02(a // 2)
         cx = sun_x + sun_r
         cy_val = sun_y + sun_r
 
@@ -584,6 +584,17 @@ def default_frames(w, h, n):
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+HEX_CHARS = "0123456789abcdef"
+
+def hex02(v):
+    """Format an integer as a 2-digit lowercase hex string."""
+    v = int(v)
+    if v < 0:
+        v = 0
+    if v > 255:
+        v = 255
+    return HEX_CHARS[v // 16] + HEX_CHARS[v % 16]
 
 def fmt1(val):
     """Format a number with 1 decimal place."""
