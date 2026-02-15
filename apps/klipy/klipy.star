@@ -123,23 +123,30 @@ def main(config):
     )
 
 def extract_image_url(file_obj):
-    """Extract the best image URL from the Klipy file object."""
+    """Extract the best image URL from the Klipy file object.
+
+    Prefers smaller sizes (sm/xs) to avoid exceeding the 460KB WebP limit.
+    Prefers webp format for smaller file sizes.
+    """
     if not file_obj:
         return None
 
-    # Prefer webp (much smaller download than gif)
+    # Try small sizes first (sm=220px, xs=90px) to keep output under 460KB
+    # Prefer webp format for smaller downloads
+    for size_key in ("sm", "xs", "md"):
+        bucket = file_obj.get(size_key)
+        if type(bucket) == "dict":
+            for fmt_key in ("webp", "gif"):
+                fmt = bucket.get(fmt_key)
+                if type(fmt) == "dict" and fmt.get("url"):
+                    return fmt["url"]
+
+    # Fallback: root-level webp
     webp = file_obj.get("webp")
     if type(webp) == "dict" and webp.get("url"):
         return webp["url"]
 
-    # Try hd gif
-    hd = file_obj.get("hd")
-    if type(hd) == "dict":
-        gif_fmt = hd.get("gif")
-        if type(gif_fmt) == "dict" and gif_fmt.get("url"):
-            return gif_fmt["url"]
-
-    # Fallback: try any format that has a url
+    # Last resort: try any format that has a url
     for key in file_obj:
         val = file_obj[key]
         if type(val) == "dict":
