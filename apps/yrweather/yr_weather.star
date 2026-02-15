@@ -131,7 +131,7 @@ def main(config):
     )
 
     # Generate weather animation
-    weather_type = get_weather_type(symbol)
+    weather_type = config.str("debug_anim", get_weather_type(symbol))
     bg_frames = make_weather_frames(weather_type, w, h, NUM_FRAMES, scale)
 
     # Stack animation + dim overlay + text for each frame
@@ -246,26 +246,37 @@ def p(x, y, pw, ph, color):
         child = render.Box(width = pw, height = ph, color = color),
     )
 
+def loop_pos(f, n, cycle, speed, phase):
+    """Compute position that seamlessly loops over n frames.
+
+    speed = number of complete cycles per n frames.
+    Returns value in [0, cycle).
+    """
+    return (f * cycle * speed // n + phase) % cycle
+
 def rain_frames(w, h, n, scale):
     """Multi-layered rain with depth, varying streak lengths, and splashes."""
     s = scale
     frames = []
 
-    # Define rain drop layers: (count, speed, width, height, color, x_offset)
+    # (count, speed_mult, width, height, color, x_offset)
+    # speed_mult = complete fall cycles per animation loop
     layers = [
-        (8, 1 * s, 1 * s, 3 * s, "#2244AA30", 0),  # back: slow, dim, long
-        (12, 2 * s, 1 * s, 2 * s, "#4169E170", 3 * s),  # mid: medium
-        (8, 3 * s, 1 * s, 3 * s, "#5B8DEEA0", 1 * s),  # front: fast, bright
+        (8, 1, 1 * s, 3 * s, "#2244AA30", 0),  # back: slow, dim, long
+        (12, 2, 1 * s, 2 * s, "#4169E170", 3 * s),  # mid: medium
+        (8, 3, 1 * s, 3 * s, "#5B8DEEA0", 1 * s),  # front: fast, bright
     ]
 
     for f in range(n):
         parts = []
 
         # Draw each layer
-        for count, speed, dw, dh, color, xoff in layers:
+        for count, spd, dw, dh, color, xoff in layers:
+            cycle = h + dh + 2 * s
             for i in range(count):
                 x = (i * (w * 10 // count) // 10 + xoff) % w
-                y = (f * speed + i * (h * 10 // 3) // 10) % (h + dh + 2 * s)
+                phase = i * cycle // count
+                y = loop_pos(f, n, cycle, spd, phase)
                 if y <= h - dh:
                     parts.append(p(x, y, dw, dh, color))
 
@@ -279,7 +290,7 @@ def rain_frames(w, h, n, scale):
                         parts.append(p(x + 2 * s, splash_y, 1 * s, 1 * s, "#4169E130"))
 
         # Ground puddle shimmer
-        shimmer_x = (f * 5 * s) % w
+        shimmer_x = loop_pos(f, n, w, 2, 0)
         parts.append(p(shimmer_x, h - 1 * s, 4 * s, 1 * s, "#4169E120"))
 
         bg = render.Box(width = w, height = h, color = "#04040c")
@@ -291,11 +302,11 @@ def snow_frames(w, h, n, scale):
     s = scale
     frames = []
 
-    # Flake layers: (count, speed_divisor, size, wobble_range, color)
+    # (count, speed_mult, size, wobble_range, color)
     layers = [
-        (6, 3, 1 * s, 1, "#FFFFFF25"),  # back: tiny, slow, dim
+        (6, 1, 1 * s, 1, "#FFFFFF25"),  # back: tiny, slow, dim
         (10, 2, 1 * s, 2, "#FFFFFF60"),  # mid: normal
-        (6, 1, 2 * s, 3, "#FFFFFFA0"),  # front: large, fast, bright
+        (6, 3, 2 * s, 3, "#FFFFFFA0"),  # front: large, fast, bright
     ]
 
     for f in range(n):
@@ -307,11 +318,14 @@ def snow_frames(w, h, n, scale):
         parts.append(p(w - 8 * s, h - 3 * s, 6 * s, 1 * s, "#FFFFFF10"))
 
         for count, spd, sz, wob, color in layers:
+            cycle = h + sz
+            wob_cycle = wob * 2 + 1
             for i in range(count):
-                wobble = ((f // spd + i * 3) % (wob * 2 + 1)) - wob
+                phase = i * cycle // count
+                y = loop_pos(f, n, cycle, spd, phase)
+                wob_phase = (i * 3) % wob_cycle
+                wobble = loop_pos(f, n, wob_cycle, 2, wob_phase) - wob
                 x = ((i * (w * 10 // count) // 10 + 2 * s) + wobble * s) % w
-                y_raw = f * s // spd + i * (h * 10 // 4) // 10
-                y = y_raw % (h + sz)
                 if y <= h - sz - 2 * s:
                     parts.append(p(x, y, sz, sz, color))
 
@@ -376,6 +390,9 @@ def sleet_frames(w, h, n, scale):
     s = scale
     frames = []
 
+    rain_cycle = h + 3 * s
+    snow_cycle = h + 2 * s
+
     for f in range(n):
         parts = []
 
@@ -385,15 +402,18 @@ def sleet_frames(w, h, n, scale):
         # Rain drops (fast, angled feel via offset x)
         for i in range(10):
             x = (i * (w * 10 // 10) // 10 + (f % 3) * s) % w
-            y = (f * 2 * s + i * (h * 10 // 3) // 10) % (h + 3 * s)
+            phase = i * rain_cycle // 10
+            y = loop_pos(f, n, rain_cycle, 2, phase)
             if y <= h - 3 * s:
                 parts.append(p(x, y, 1 * s, 3 * s, "#4169E180"))
 
         # Snow flakes (slow, wobble)
         for i in range(8):
-            wobble = ((f + i * 2) % 5) - 2
+            wob_phase = (i * 2) % 5
+            wobble = loop_pos(f, n, 5, 2, wob_phase) - 2
             x = ((i * (w * 10 // 8) // 10 + 3 * s) + wobble * s) % w
-            y = (f * s // 2 + i * (h * 10 // 3) // 10) % (h + 2 * s)
+            phase = i * snow_cycle // 8
+            y = loop_pos(f, n, snow_cycle, 1, phase)
             sz = (2 * s) if i % 3 == 0 else (1 * s)
             if y <= h - sz - 1 * s:
                 parts.append(p(x, y, sz, sz, "#FFFFFF70"))
@@ -425,8 +445,11 @@ def fog_frames(w, h, n, scale):
             if y_base + bh > h:
                 continue
             bw = w * wpct // 100
-            drift = (f * spd * s) // 2
-            x = drift % (w + bw) - bw
+            cycle = w + bw
+            abs_spd = max(1, abs(spd))
+            fwd = loop_pos(f, n, cycle, abs_spd, 0)
+            drift = fwd if spd > 0 else (cycle - fwd) % cycle
+            x = drift - bw
 
             # Pulse alpha slightly
             pulse = ((f * 3 + y_base) % 8)
@@ -467,7 +490,13 @@ def cloud_frames(w, h, n, scale):
         for cy, cw, ch, spd, alpha, has_bump in clouds:
             if cy + ch > h:
                 continue
-            x = ((f * spd * s) // 2 + cy * 3) % (w + cw + 10 * s) - cw - 5 * s
+            cycle = w + cw + 10 * s
+            offset = cw + 5 * s
+            abs_spd = max(1, abs(spd))
+            phase = (cy * 3) % cycle
+            fwd = loop_pos(f, n, cycle, abs_spd, phase)
+            drift = fwd if spd > 0 else (cycle - loop_pos(f, n, cycle, abs_spd, 0) + phase) % cycle
+            x = drift - offset
             color = "#8888AA" + alpha
 
             # Body
