@@ -88,6 +88,12 @@ def main(config):
         temp_str = "%d°C" % int(temp_c)
 
     condition_text, condition_color = get_condition(symbol)
+
+    # Debug override: force a specific animation and matching label
+    debug_anim = config.str("debug_anim", "")
+    if debug_anim:
+        condition_text, condition_color = DEBUG_CONDITIONS.get(debug_anim, (debug_anim, "#FFFFFF"))
+
     source_label = "Nowcast" if source == "nowcast" else "Forecast"
 
     scale = 2 if canvas.is2x() else 1
@@ -131,7 +137,7 @@ def main(config):
     )
 
     # Generate weather animation
-    weather_type = config.str("debug_anim", get_weather_type(symbol))
+    weather_type = debug_anim if debug_anim else get_weather_type(symbol)
     bg_frames = make_weather_frames(weather_type, w, h, NUM_FRAMES, scale)
 
     # Stack animation + dim overlay + text for each frame
@@ -148,6 +154,17 @@ def main(config):
 # ---------------------------------------------------------------------------
 # Weather lookup tables
 # ---------------------------------------------------------------------------
+
+# Debug animation type -> (display text, color)
+DEBUG_CONDITIONS = {
+    "rain": ("Rain", "#4169E1"),
+    "thunder": ("Thunder", "#FF4500"),
+    "snow": ("Snow", "#E8E8E8"),
+    "sleet": ("Sleet", "#87CEEB"),
+    "fog": ("Fog", "#696969"),
+    "cloudy": ("Cloudy", "#808080"),
+    "clear": ("Clear sky", "#FFD700"),
+}
 
 # Exact symbol code -> (display text, color)
 CONDITIONS_EXACT = {
