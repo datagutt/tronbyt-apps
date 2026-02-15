@@ -373,30 +373,35 @@ def thunder_frames(w, h, n, scale):
         (2 * s, 9 * s, 2 * s, 3 * s),
     ]
 
+    # Two evenly-spaced lightning strikes per loop, derived from n
+    s1 = n // 8  # first strike start
+    s2 = s1 + n // 2  # second strike start
+    flash_frames = [s1, s1 + 1, s1 + 2, s2, s2 + 1, s2 + 2]
+    peak_frames = [s1 + 1, s2 + 1]
+    glow_frames = [s1 + 3, s2 + 3]
+    bolt2_frames = [s2, s2 + 1, s2 + 2]
+
     for f in range(n):
         layers = [base[f]]
 
-        # Flash + bolt at specific frames (two strikes per loop)
-        if f in (6, 7, 8, 30, 31, 32):
-            bright = "90" if f in (7, 31) else "50"
+        if f in flash_frames:
+            bright = "90" if f in peak_frames else "50"
             layers.append(render.Box(width = w, height = h, color = "#FFFF00" + bright))
 
-            # Draw bolt 1
-            bolt_color = "#FFFFFFD0" if f in (7, 31) else "#FFFF8080"
+            bolt_color = "#FFFFFFD0" if f in peak_frames else "#FFFF8080"
             for dx, dy, bw, bh in bolt_segs:
                 bx = bolt_x_base + dx
                 if bx >= 0 and bx + bw <= w and dy + bh <= h:
                     layers.append(p(bx, dy, bw, bh, bolt_color))
 
             # Draw bolt 2 on second flash
-            if f in (30, 31, 32):
+            if f in bolt2_frames:
                 for dx, dy, bw, bh in bolt2_segs:
                     bx = bolt2_x_base + dx
                     if bx >= 0 and bx + bw <= w and dy + bh <= h:
                         layers.append(p(bx, dy, bw, bh, bolt_color))
 
-        elif f in (9, 33):
-            # Afterglow
+        elif f in glow_frames:
             layers.append(render.Box(width = w, height = h, color = "#FFFFFF15"))
 
         result.append(render.Stack(children = layers))
