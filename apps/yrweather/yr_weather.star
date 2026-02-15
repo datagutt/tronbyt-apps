@@ -15,7 +15,7 @@ NOWCAST_URL = "https://api.met.no/weatherapi/nowcast/2.0/complete"
 FORECAST_TTL = 1800  # 30 min
 NOWCAST_TTL = 300  # 5 min
 USER_AGENT = "TronbytYRWeather/1.0 github.com/tronbyt/apps"
-NUM_FRAMES = 24
+NUM_FRAMES = 48
 FRAME_DELAY = 80  # ms per frame
 
 DEFAULT_LOCATION = """
@@ -376,26 +376,26 @@ def thunder_frames(w, h, n, scale):
     for f in range(n):
         layers = [base[f]]
 
-        # Flash + bolt at specific frames
-        if f in (3, 4, 15, 16):
-            bright = "90" if f in (4, 16) else "50"
+        # Flash + bolt at specific frames (two strikes per loop)
+        if f in (6, 7, 8, 30, 31, 32):
+            bright = "90" if f in (7, 31) else "50"
             layers.append(render.Box(width = w, height = h, color = "#FFFF00" + bright))
 
             # Draw bolt 1
-            bolt_color = "#FFFFFFD0" if f in (4, 16) else "#FFFF8080"
+            bolt_color = "#FFFFFFD0" if f in (7, 31) else "#FFFF8080"
             for dx, dy, bw, bh in bolt_segs:
                 bx = bolt_x_base + dx
                 if bx >= 0 and bx + bw <= w and dy + bh <= h:
                     layers.append(p(bx, dy, bw, bh, bolt_color))
 
             # Draw bolt 2 on second flash
-            if f in (15, 16):
+            if f in (30, 31, 32):
                 for dx, dy, bw, bh in bolt2_segs:
                     bx = bolt2_x_base + dx
                     if bx >= 0 and bx + bw <= w and dy + bh <= h:
                         layers.append(p(bx, dy, bw, bh, bolt_color))
 
-        elif f in (5, 17):
+        elif f in (9, 33):
             # Afterglow
             layers.append(render.Box(width = w, height = h, color = "#FFFFFF15"))
 
