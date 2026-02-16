@@ -160,7 +160,8 @@ def main(config):
 
         # Format as 24h clock time
         dep_local = dep_time.in_location("Europe/Oslo")
-        time_text = dep_local.format("15:04")
+        time_hh = dep_local.format("15")
+        time_mm = dep_local.format("04")
 
         # Line color from API or fallback to mode color
         colour = line.get("presentation", {}).get("colour", "")
@@ -172,7 +173,8 @@ def main(config):
         departures.append({
             "code": line.get("publicCode", ""),
             "dest": call.get("destinationDisplay", {}).get("frontText", ""),
-            "time": time_text,
+            "hh": time_hh,
+            "mm": time_mm,
             "color": line_color,
         })
 
@@ -232,10 +234,8 @@ def main(config):
                         render.Box(
                             width = time_w,
                             height = row_h,
-                            child = render.Text(
-                                content = dep["time"],
-                                font = font,
-                                color = YELLOW,
+                            child = render.Animation(
+                                children = blink_frames(dep["hh"], dep["mm"], font),
                             ),
                         ),
                     ],
@@ -252,6 +252,16 @@ def main(config):
             ] + rows,
         ),
     )
+
+def blink_frames(hh, mm, font):
+    on = render.Text(content = hh + ":" + mm, font = font, color = YELLOW)
+    off = render.Text(content = hh + " " + mm, font = font, color = YELLOW)
+    frames = []
+    for _ in range(15):
+        frames.append(on)
+    for _ in range(15):
+        frames.append(off)
+    return frames
 
 def render_header(name, w, header_h, font, scale):
     return render.Box(
