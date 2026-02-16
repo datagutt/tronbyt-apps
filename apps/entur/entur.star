@@ -158,13 +158,9 @@ def main(config):
         if diff < -30:
             continue
 
-        # Format countdown
-        if diff < 30:
-            time_text = "Nå"
-        elif diff < 90:
-            time_text = "1 min"
-        else:
-            time_text = "%d min" % int(diff / 60)
+        # Format as 24h clock time
+        dep_local = dep_time.in_location("Europe/Oslo")
+        time_text = dep_local.format("15:04")
 
         # Line color from API or fallback to mode color
         colour = line.get("presentation", {}).get("colour", "")
