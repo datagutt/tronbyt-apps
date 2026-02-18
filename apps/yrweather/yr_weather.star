@@ -310,7 +310,7 @@ def rain_frames(w, h, n, scale):
         shimmer_x = loop_pos(f, n, w, 2, 0)
         parts.append(p(shimmer_x, h - 1 * s, 4 * s, 1 * s, "#4169E120"))
 
-        bg = render.Box(width = w, height = h, color = "#04040c")
+        bg = render.Box(width = w, height = h, color = "#000000")
         frames.append(render.Stack(children = [bg] + parts))
     return frames
 
@@ -346,7 +346,7 @@ def snow_frames(w, h, n, scale):
                 if y <= h - sz - 2 * s:
                     parts.append(p(x, y, sz, sz, color))
 
-        bg = render.Box(width = w, height = h, color = "#080814")
+        bg = render.Box(width = w, height = h, color = "#000000")
         frames.append(render.Stack(children = [bg] + parts))
     return frames
 
@@ -440,7 +440,7 @@ def sleet_frames(w, h, n, scale):
             if y <= h - sz - 1 * s:
                 parts.append(p(x, y, sz, sz, "#FFFFFF70"))
 
-        bg = render.Box(width = w, height = h, color = "#060610")
+        bg = render.Box(width = w, height = h, color = "#000000")
         frames.append(render.Stack(children = [bg] + parts))
     return frames
 
@@ -488,7 +488,7 @@ def fog_frames(w, h, n, scale):
                     ),
                 )
 
-        bg = render.Box(width = w, height = h, color = "#0c0c12")
+        bg = render.Box(width = w, height = h, color = "#000000")
         frames.append(render.Stack(children = [bg] + parts))
     return frames
 
@@ -548,7 +548,7 @@ def cloud_frames(w, h, n, scale):
                             ),
                         )
 
-        bg = render.Box(width = w, height = h, color = "#08080e")
+        bg = render.Box(width = w, height = h, color = "#000000")
         frames.append(render.Stack(children = [bg] + parts))
     return frames
 
@@ -561,7 +561,7 @@ def clear_frames(w, h, n, scale):
     frames = []
 
     for f in range(n):
-        parts = [render.Box(width = w, height = h, color = "#08060a")]
+        parts = [render.Box(width = w, height = h, color = "#000000")]
 
         # Warm horizon glow at bottom
         parts.append(p(0, h - 4 * s, w, 4 * s, "#FF880010"))
@@ -629,7 +629,7 @@ def clear_frames(w, h, n, scale):
 
 def default_frames(w, h, n):
     """Plain dark background."""
-    frame = render.Box(width = w, height = h, color = "#0a0a10")
+    frame = render.Box(width = w, height = h, color = "#000000")
     return [frame] * n
 
 # ---------------------------------------------------------------------------
