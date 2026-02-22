@@ -18,6 +18,10 @@
   ```sh
   pixlet render apps/<appname>/<app_name>.star
   ```
+  Then generate a 2x variant preview image:
+  ```sh
+  pixlet render apps/<appname>/<app_name>.star -2
+  ```
   This helps reviewers and users see what your app looks like. Replace `<appname>` and `<app_name>` as appropriate.
 
 ### 4. Starlark Coding Guidelines
