@@ -1,0 +1,9 @@
+---
+id: donate
+name: Donation Alert
+summary: Animated donation alerts
+desc: Display animated donation alerts with coin animation, sparkle effects, and donor username. Intended to be pushed to the device on demand.
+author: datagutt
+fileName: donation_alert.star
+packageName: donate
+supports2x: true
