@@ -88,7 +88,7 @@ def main(config):
     scale = 2 if canvas.is2x() else 1
     w = canvas.width()
     h = canvas.height()
-    bar_h = 7 * scale
+    bar_h = 5 * scale
 
     return render.Root(
         child = render.Column(
@@ -113,7 +113,7 @@ def main(config):
                         children = [
                             render.Image(
                                 src = KLIPY_LOGO,
-                                height = bar_h - 2 * scale,
+                                height = bar_h - scale,
                             ),
                         ],
                     ),
