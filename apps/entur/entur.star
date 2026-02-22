@@ -257,7 +257,7 @@ def smart_marquee(text, width, font, color):
         return render.Marquee(width = width, child = txt)
     return render.Marquee(
         width = width,
-        offset_start = 0,
+        offset_start = 16,
         offset_end = width,
         child = txt,
     )
