@@ -223,14 +223,7 @@ def main(config):
                                 ),
                             ),
                         ),
-                        render.Marquee(
-                            width = dest_w,
-                            child = render.Text(
-                                content = dep["dest"],
-                                font = font,
-                                color = WHITE,
-                            ),
-                        ),
+                        smart_marquee(dep["dest"], dest_w, font, WHITE),
                         render.Box(
                             width = time_w,
                             height = row_h,
@@ -245,12 +238,28 @@ def main(config):
 
     return render.Root(
         max_age = 60,
+        delay = 50,
         child = render.Column(
             children = [
                 render_header(actual_name, w, header_h, font, scale),
                 render.Box(width = w, height = sep_h, color = SEP_COLOR),
             ] + rows,
         ),
+    )
+
+def smart_marquee(text, width, font, color):
+    """Marquee with smooth scroll only when text overflows."""
+    txt = render.Text(content = text, font = font, color = color)
+
+    # Font character widths (approximate)
+    char_w = 4 if font == "tom-thumb" else 6
+    if len(text) * char_w <= width:
+        return render.Marquee(width = width, child = txt)
+    return render.Marquee(
+        width = width,
+        offset_start = 0,
+        offset_end = width,
+        child = txt,
     )
 
 def blink_frames(hh, mm, font):
@@ -270,14 +279,7 @@ def render_header(name, w, header_h, font, scale):
         color = HEADER_BG,
         child = render.Padding(
             pad = (1 * scale, 0, 0, 0),
-            child = render.Marquee(
-                width = w - 2 * scale,
-                child = render.Text(
-                    content = name,
-                    font = font,
-                    color = GREY,
-                ),
-            ),
+            child = smart_marquee(name, w - 2 * scale, font, GREY),
         ),
     )
 
