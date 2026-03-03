@@ -177,7 +177,7 @@ def render_calendar_base_object(top, bottom, scale):
         delay = FRAME_DELAY,
         child = render.Box(
             padding = 2 * scale,
-            color = "#111",
+            color = "#000",
             child = render.Column(
                 expanded = True,
                 children = top + bottom,
