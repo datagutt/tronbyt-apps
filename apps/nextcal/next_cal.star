@@ -425,7 +425,10 @@ DEFAULT_TRUNCATE_EVENT_SUMMARY = True
 DEFAULT_SHOW_FULL_NAMES = False
 DEFAULT_SHOW_IN_PROGRESS = True
 FRAME_DELAY = 50
-LAMBDA_URL = "https://6bfnhr9vy7.execute-api.us-east-1.amazonaws.com/ics-next-event"
+
+LAMBDA_URL = "https://ics-calendar-tidbyt-vercel.vercel.app/api/ics-next-event"
+
+#LAMBDA_URL = "https://6bfnhr9vy7.execute-api.us-east-1.amazonaws.com/ics-next-event"
 
 #this is the original AWS Lambda URL that is hosting the helper function
 #LAMBDA_URL = "https://xmd10xd284.execute-api.us-east-1.amazonaws.com/ics-next-event"
