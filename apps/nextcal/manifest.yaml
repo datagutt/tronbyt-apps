@@ -1,0 +1,9 @@
+---
+id: next-cal
+name: Next Cal
+summary: Displays Calendar from iCal
+desc: Displays Calendar from iCal (.ics) files.
+author: datagutt
+fileName: next_cal.star
+packageName: nextcal
+supports2x: true
