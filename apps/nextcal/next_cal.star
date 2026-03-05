@@ -70,10 +70,10 @@ def get_calendar_text_color(event):
     DEFAULT = "#ff83f3"
     if event["detail"]["isAllDay"]:
         return DEFAULT
-    elif event["detail"]["minutesUntilStart"] <= 5:
-        return "#ff5000"
     elif event["detail"]["minutesUntilStart"] <= 2:
         return "#9000ff"
+    elif event["detail"]["minutesUntilStart"] <= 5:
+        return "#ff5000"
     else:
         return DEFAULT
 
