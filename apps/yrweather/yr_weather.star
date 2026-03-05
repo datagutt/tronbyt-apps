@@ -90,8 +90,8 @@ def main(config):
     condition_text, condition_color = get_condition(symbol)
 
     # Debug override: force a specific animation and matching label
-    debug_anim = config.str("debug_anim", "")
-    if debug_anim:
+    debug_anim = config.str("debug_anim", "none")
+    if debug_anim and debug_anim != "none":
         condition_text, condition_color = CONDITIONS.get(debug_anim, (debug_anim, "#FFFFFF"))
 
     source_label = "Nowcast" if source == "nowcast" else "Forecast"
@@ -137,7 +137,7 @@ def main(config):
     )
 
     # Generate weather animation
-    weather_type = debug_anim if debug_anim else get_weather_type(symbol)
+    weather_type = get_weather_type(debug_anim) if (debug_anim and debug_anim != "none") else get_weather_type(symbol)
     bg_frames = make_weather_frames(weather_type, w, h, NUM_FRAMES, scale)
 
     # Stack animation + dim overlay + text for each frame
@@ -213,6 +213,51 @@ CONDITIONS = {
     "snowshowersandthunder": ("Snw shwrs+thdr", "#FF4500"),
     "heavysnowshowersandthunder": ("Hvy snw sh+thr", "#DC143C"),
 }
+
+# Ordered list for schema dropdown
+CONDITIONS_KEYS = [
+    "clearsky",
+    "fair",
+    "partlycloudy",
+    "cloudy",
+    "fog",
+    "lightrain",
+    "rain",
+    "heavyrain",
+    "lightrainshowers",
+    "rainshowers",
+    "heavyrainshowers",
+    "lightrainandthunder",
+    "rainandthunder",
+    "heavyrainandthunder",
+    "lightrainshowersandthunder",
+    "rainshowersandthunder",
+    "heavyrainshowersandthunder",
+    "lightsleet",
+    "sleet",
+    "heavysleet",
+    "lightsleetshowers",
+    "sleetshowers",
+    "heavysleetshowers",
+    "lightsleetandthunder",
+    "sleetandthunder",
+    "heavysleetandthunder",
+    "lightssleetshowersandthunder",
+    "sleetshowersandthunder",
+    "heavysleetshowersandthunder",
+    "lightsnow",
+    "snow",
+    "heavysnow",
+    "lightsnowshowers",
+    "snowshowers",
+    "heavysnowshowers",
+    "lightsnowandthunder",
+    "snowandthunder",
+    "heavysnowandthunder",
+    "lightssnowshowersandthunder",
+    "snowshowersandthunder",
+    "heavysnowshowersandthunder",
+]
 
 # Complete symbol code -> animation type
 ANIM_TYPES = {
@@ -743,6 +788,11 @@ def get_schema():
         schema.Option(display = "Nowcast (Nordic only)", value = "nowcast"),
     ]
 
+    debug_options = [schema.Option(display = "None (use API)", value = "none")]
+    for code in CONDITIONS_KEYS:
+        label = CONDITIONS[code][0]
+        debug_options.append(schema.Option(display = "%s (%s)" % (label, code), value = code))
+
     return schema.Schema(
         version = "1",
         fields = [
@@ -767,6 +817,14 @@ def get_schema():
                 icon = "temperatureHalf",
                 default = "celsius",
                 options = unit_options,
+            ),
+            schema.Dropdown(
+                id = "debug_anim",
+                name = "Debug Animation",
+                desc = "Override weather with a specific symbol for testing.",
+                icon = "bug",
+                default = "none",
+                options = debug_options,
             ),
         ],
     )
