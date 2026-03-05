@@ -2,11 +2,13 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/calendar_icon.png", CALENDAR_ICON_ASSET = "file")
+load("images/heart.png", HEART_ASSET = "file")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 CALENDAR_ICON = CALENDAR_ICON_ASSET.readall()
+HEART_ICON = HEART_ASSET.readall()
 
 def main(config):
     scale = 2 if canvas.is2x() else 1
@@ -238,10 +240,17 @@ def get_calendar_bottom(data, scale, w):
 
     if not data["hasEvent"]:
         children.append(
-            render.WrappedText(
-                DONE_TEXT,
-                color = "#ff83f3",
-                font = font,
+            render.Row(
+                cross_align = "center",
+                children = [
+                    render.WrappedText(
+                        DONE_TEXT,
+                        color = "#ff83f3",
+                        font = font,
+                    ),
+                    render.Box(width = 1 * scale, height = 1),
+                    render.Image(src = HEART_ICON, width = 5 * scale, height = 5 * scale),
+                ],
             ),
         )
 
@@ -419,7 +428,7 @@ P_SHOW_IN_PROGRESS = "show_in_progress"
 P_TRUNCATE_EVENT_SUMMARY = "truncate_event_summary"
 P_ALL_DAY = "all_day"
 
-DONE_TEXT = "DONE FOR THE DAY ♡⁠"
+DONE_TEXT = "DONE FOR THE DAY"
 DEFAULT_SHOW_EXPANDED_TIME_WINDOW = True
 DEFAULT_TRUNCATE_EVENT_SUMMARY = True
 DEFAULT_SHOW_FULL_NAMES = False
