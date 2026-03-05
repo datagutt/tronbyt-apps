@@ -149,14 +149,15 @@ def get_calendar_render_data(now, usersTz, event, show_expanded_time_window, sho
         "now": now,
     }
 
-    #if there's no event or it is an all day event, build the top part of calendar as usual
     if not event:
         baseObject["hasEvent"] = False
+        baseObject["noEvents"] = True
         return baseObject
 
     shouldRenderSummary = event["detail"]["isToday"] or show_expanded_time_window
     if not shouldRenderSummary:
         baseObject["hasEvent"] = False
+        baseObject["noEvents"] = False
         return baseObject
 
     startTime = time.from_timestamp(int(event["start"])).in_location(usersTz)
@@ -239,12 +240,13 @@ def get_calendar_bottom(data, scale, w):
         )
 
     if not data["hasEvent"]:
+        msg = NO_EVENTS_TEXT if data.get("noEvents") else DONE_TEXT
         children.append(
             render.Row(
                 cross_align = "center",
                 children = [
                     render.WrappedText(
-                        DONE_TEXT,
+                        msg,
                         color = "#ff83f3",
                         font = font,
                     ),
@@ -428,7 +430,8 @@ P_SHOW_IN_PROGRESS = "show_in_progress"
 P_TRUNCATE_EVENT_SUMMARY = "truncate_event_summary"
 P_ALL_DAY = "all_day"
 
-DONE_TEXT = "DONE FOR THE DAY"
+DONE_TEXT = "ALL DONE!"
+NO_EVENTS_TEXT = "FREE DAY!"
 DEFAULT_SHOW_EXPANDED_TIME_WINDOW = True
 DEFAULT_TRUNCATE_EVENT_SUMMARY = True
 DEFAULT_SHOW_FULL_NAMES = False
