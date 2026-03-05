@@ -92,7 +92,7 @@ def main(config):
     # Debug override: force a specific animation and matching label
     debug_anim = config.str("debug_anim", "")
     if debug_anim:
-        condition_text, condition_color = DEBUG_CONDITIONS.get(debug_anim, (debug_anim, "#FFFFFF"))
+        condition_text, condition_color = CONDITIONS.get(debug_anim, (debug_anim, "#FFFFFF"))
 
     source_label = "Nowcast" if source == "nowcast" else "Forecast"
 
@@ -155,55 +155,115 @@ def main(config):
 # Weather lookup tables
 # ---------------------------------------------------------------------------
 
-# Debug animation type -> (display text, color)
-DEBUG_CONDITIONS = {
-    "rain": ("Rain", "#4169E1"),
-    "thunder": ("Thunder", "#FF4500"),
-    "snow": ("Snow", "#E8E8E8"),
-    "sleet": ("Sleet", "#87CEEB"),
-    "fog": ("Fog", "#696969"),
-    "cloudy": ("Cloudy", "#808080"),
-    "clear": ("Clear sky", "#FFD700"),
-}
-
-# Exact symbol code -> (display text, color)
-CONDITIONS_EXACT = {
+# Complete symbol code -> (display text, color)
+# All 41 symbols from https://api.met.no/weatherapi/weathericon/2.0
+CONDITIONS = {
+    # Base conditions
     "clearsky": ("Clear sky", "#FFD700"),
     "fair": ("Fair", "#FFE4B5"),
     "partlycloudy": ("Partly cloudy", "#B0B0B0"),
     "cloudy": ("Cloudy", "#808080"),
     "fog": ("Fog", "#696969"),
+    # Rain
+    "lightrain": ("Light rain", "#6495ED"),
+    "rain": ("Rain", "#4169E1"),
+    "heavyrain": ("Heavy rain", "#1E3A8A"),
+    # Rain showers
+    "lightrainshowers": ("Lt rain shwrs", "#6495ED"),
+    "rainshowers": ("Rain showers", "#4169E1"),
+    "heavyrainshowers": ("Hvy rain shwrs", "#1E3A8A"),
+    # Rain + thunder
+    "lightrainandthunder": ("Lt rain+thndr", "#FF6347"),
+    "rainandthunder": ("Rain+thunder", "#FF4500"),
+    "heavyrainandthunder": ("Hvy rain+thndr", "#DC143C"),
+    # Rain showers + thunder
+    "lightrainshowersandthunder": ("Lt shwrs+thndr", "#FF6347"),
+    "rainshowersandthunder": ("Shwrs+thunder", "#FF4500"),
+    "heavyrainshowersandthunder": ("Hvy shwrs+thdr", "#DC143C"),
+    # Sleet
+    "lightsleet": ("Light sleet", "#87CEEB"),
+    "sleet": ("Sleet", "#87CEEB"),
+    "heavysleet": ("Heavy sleet", "#5F9EA0"),
+    # Sleet showers
+    "lightsleetshowers": ("Lt sleet shwrs", "#87CEEB"),
+    "sleetshowers": ("Sleet showers", "#87CEEB"),
+    "heavysleetshowers": ("Hvy sleet shwr", "#5F9EA0"),
+    # Sleet + thunder
+    "lightsleetandthunder": ("Lt sleet+thndr", "#FF6347"),
+    "sleetandthunder": ("Sleet+thunder", "#FF4500"),
+    "heavysleetandthunder": ("Hvy slt+thndr", "#DC143C"),
+    # Sleet showers + thunder
+    "lightssleetshowersandthunder": ("Lt slt shr+thr", "#FF6347"),
+    "sleetshowersandthunder": ("Slt shwrs+thdr", "#FF4500"),
+    "heavysleetshowersandthunder": ("Hvy slt sh+thr", "#DC143C"),
+    # Snow
+    "lightsnow": ("Light snow", "#F0F0F0"),
+    "snow": ("Snow", "#E8E8E8"),
+    "heavysnow": ("Heavy snow", "#E8E8FF"),
+    # Snow showers
+    "lightsnowshowers": ("Lt snow shwrs", "#F0F0F0"),
+    "snowshowers": ("Snow showers", "#E8E8E8"),
+    "heavysnowshowers": ("Hvy snow shwrs", "#E8E8FF"),
+    # Snow + thunder
+    "lightsnowandthunder": ("Lt snow+thndr", "#FF6347"),
+    "snowandthunder": ("Snow+thunder", "#FF4500"),
+    "heavysnowandthunder": ("Hvy snow+thndr", "#DC143C"),
+    # Snow showers + thunder
+    "lightssnowshowersandthunder": ("Lt snw shr+thr", "#FF6347"),
+    "snowshowersandthunder": ("Snw shwrs+thdr", "#FF4500"),
+    "heavysnowshowersandthunder": ("Hvy snw sh+thr", "#DC143C"),
 }
 
-# Substring matches checked in order (first match wins) -> (display text, color)
-CONDITIONS_PATTERN = [
-    ("thunder", "Thunder", "#FF4500"),
-    ("heavysnow", "Heavy snow", "#E8E8FF"),
-    ("lightsnow", "Light snow", "#F0F0F0"),
-    ("snow", "Snow", "#E8E8E8"),
-    ("heavysleet", "Heavy sleet", "#5F9EA0"),
-    ("sleet", "Sleet", "#87CEEB"),
-    ("heavyrain", "Heavy rain", "#1E3A8A"),
-    ("lightrain", "Light rain", "#6495ED"),
-    ("rain", "Rain", "#4169E1"),
-]
-
-# Exact symbol code -> animation type
-ANIM_TYPE_EXACT = {
-    "fog": "fog",
-    "cloudy": "cloudy",
-    "partlycloudy": "cloudy",
+# Complete symbol code -> animation type
+ANIM_TYPES = {
     "clearsky": "clear",
     "fair": "clear",
+    "partlycloudy": "cloudy",
+    "cloudy": "cloudy",
+    "fog": "fog",
+    # Rain
+    "lightrain": "rain",
+    "rain": "rain",
+    "heavyrain": "rain",
+    "lightrainshowers": "rain",
+    "rainshowers": "rain",
+    "heavyrainshowers": "rain",
+    # Rain + thunder
+    "lightrainandthunder": "thunder",
+    "rainandthunder": "thunder",
+    "heavyrainandthunder": "thunder",
+    "lightrainshowersandthunder": "thunder",
+    "rainshowersandthunder": "thunder",
+    "heavyrainshowersandthunder": "thunder",
+    # Sleet
+    "lightsleet": "sleet",
+    "sleet": "sleet",
+    "heavysleet": "sleet",
+    "lightsleetshowers": "sleet",
+    "sleetshowers": "sleet",
+    "heavysleetshowers": "sleet",
+    # Sleet + thunder
+    "lightsleetandthunder": "thunder",
+    "sleetandthunder": "thunder",
+    "heavysleetandthunder": "thunder",
+    "lightssleetshowersandthunder": "thunder",
+    "sleetshowersandthunder": "thunder",
+    "heavysleetshowersandthunder": "thunder",
+    # Snow
+    "lightsnow": "snow",
+    "snow": "snow",
+    "heavysnow": "snow",
+    "lightsnowshowers": "snow",
+    "snowshowers": "snow",
+    "heavysnowshowers": "snow",
+    # Snow + thunder
+    "lightsnowandthunder": "thunder",
+    "snowandthunder": "thunder",
+    "heavysnowandthunder": "thunder",
+    "lightssnowshowersandthunder": "thunder",
+    "snowshowersandthunder": "thunder",
+    "heavysnowshowersandthunder": "thunder",
 }
-
-# Substring matches checked in order -> animation type
-ANIM_TYPE_PATTERN = [
-    ("thunder", "thunder"),
-    ("snow", "snow"),
-    ("sleet", "sleet"),
-    ("rain", "rain"),
-]
 
 # Animation type -> frame generator function
 ANIM_GENERATORS = {
@@ -226,21 +286,13 @@ def strip_time_suffix(symbol_code):
 def get_weather_type(symbol_code):
     """Get simplified weather type for animation selection."""
     code = strip_time_suffix(symbol_code)
-    if code in ANIM_TYPE_EXACT:
-        return ANIM_TYPE_EXACT[code]
-    for pattern, anim_type in ANIM_TYPE_PATTERN:
-        if pattern in code:
-            return anim_type
-    return "default"
+    return ANIM_TYPES.get(code, "default")
 
 def get_condition(symbol_code):
     """Map YR symbol code to display text and color."""
     code = strip_time_suffix(symbol_code)
-    if code in CONDITIONS_EXACT:
-        return CONDITIONS_EXACT[code]
-    for pattern, text, color in CONDITIONS_PATTERN:
-        if pattern in code:
-            return (text, color)
+    if code in CONDITIONS:
+        return CONDITIONS[code]
     if code:
         return (code, "#FFFFFF")
     return ("Unknown", "#FFFFFF")
