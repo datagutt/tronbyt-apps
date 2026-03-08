@@ -401,6 +401,24 @@ def loop_pos(f, n, cycle, speed, phase):
     """
     return (f * cycle * speed // n + phase) % cycle
 
+def triangle_wobble(f, n, amplitude, num_cycles, phase):
+    """Smooth triangle-wave wobble that loops cleanly over n frames.
+
+    Returns value in [-amplitude, amplitude].
+    num_cycles = complete back-and-forth oscillations per n frames.
+    num_cycles must divide n evenly for seamless looping.
+
+    Unlike loop_pos (which is a sawtooth via modulo), a triangle wave
+    reverses direction at the peaks, so there is never a pixel jump.
+    """
+    period = n // num_cycles
+    half = period // 2
+    pos = (f + phase) % period
+    if pos <= half:
+        return -amplitude + 2 * amplitude * pos // half
+    else:
+        return amplitude - 2 * amplitude * (pos - half) // half
+
 def rain_frames(w, h, n, scale):
     """Multi-layered rain with depth, varying streak lengths, and splashes."""
     s = scale
@@ -413,6 +431,8 @@ def rain_frames(w, h, n, scale):
         (12, 2, 1 * s, 2 * s, "#4169E170", 3 * s),  # mid: medium
         (8, 3, 1 * s, 3 * s, "#5B8DEEA0", 1 * s),  # front: fast, bright
     ]
+
+    shimmer_cycle = loop_cycle(w, 2, n)
 
     for f in range(n):
         parts = []
@@ -437,7 +457,6 @@ def rain_frames(w, h, n, scale):
                         parts.append(p(x + 2 * s, splash_y, 1 * s, 1 * s, "#4169E130"))
 
         # Ground puddle shimmer
-        shimmer_cycle = loop_cycle(w, 2, n)
         shimmer_x = loop_pos(f, n, shimmer_cycle, 2, 0)
         parts.append(p(shimmer_x, h - 1 * s, 4 * s, 1 * s, "#4169E120"))
 
@@ -467,12 +486,11 @@ def snow_frames(w, h, n, scale):
 
         for count, spd, sz, wob, color in layers:
             cycle = loop_cycle(h + sz, spd, n)
-            wob_cycle = wob * 2 + 1
             for i in range(count):
                 phase = i * cycle // count
                 y = loop_pos(f, n, cycle, spd, phase)
-                wob_phase = (i * 3) % wob_cycle
-                wobble = loop_pos(f, n, wob_cycle, 2, wob_phase) - wob
+                wob_phase = i * n // (count * 2)
+                wobble = triangle_wobble(f, n, wob, 2, wob_phase)
                 x = ((i * (w * 10 // count) // 10 + 2 * s) + wobble * s) % w
                 if y <= h - sz - 2 * s:
                     parts.append(p(x, y, sz, sz, color))
@@ -562,8 +580,8 @@ def sleet_frames(w, h, n, scale):
 
         # Snow flakes (slow, wobble)
         for i in range(8):
-            wob_phase = (i * 2) % 5
-            wobble = loop_pos(f, n, 5, 2, wob_phase) - 2
+            wob_phase = i * n // (8 * 2)
+            wobble = triangle_wobble(f, n, 2, 2, wob_phase)
             x = ((i * (w * 10 // 8) // 10 + 3 * s) + wobble * s) % w
             phase = i * snow_cycle // 8
             y = loop_pos(f, n, snow_cycle, 1, phase)
