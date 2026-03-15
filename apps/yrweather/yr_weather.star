@@ -433,8 +433,6 @@ def rain_frames(w, h, n, scale):
         (8, 3, 1 * s, 3 * s, "#5B8DEEA0", 1 * s),  # front: fast, bright
     ]
 
-    shimmer_cycle = loop_cycle(w, 2, n)
-
     for f in range(n):
         parts = []
 
@@ -448,18 +446,21 @@ def rain_frames(w, h, n, scale):
                 if y <= h - dh:
                     parts.append(p(x, y, dw, dh, color))
 
-                # Splash at bottom: brief bright dot when drop reaches ground
+                # Splash at bottom: show only on the single frame the drop
+                # first reaches the ground, so it reads as an impact flash
+                # rather than a dot sliding across the floor.
                 splash_y = h - 1 * s
-                if y >= h - dh and y <= h:
+                hit_y = h - dh
+                if y >= hit_y and y < hit_y + cycle * spd // n + 1:
                     parts.append(p(x, splash_y, 2 * s, 1 * s, "#6495ED50"))
                     if x > 0:
                         parts.append(p(x - 1 * s, splash_y, 1 * s, 1 * s, "#4169E130"))
                     if x + 2 * s < w:
                         parts.append(p(x + 2 * s, splash_y, 1 * s, 1 * s, "#4169E130"))
 
-        # Ground puddle shimmer
-        shimmer_x = loop_pos(f, n, shimmer_cycle, 2, 0)
-        parts.append(p(shimmer_x, h - 1 * s, 4 * s, 1 * s, "#4169E120"))
+        # Static ground puddle accents (no horizontal drift)
+        parts.append(p(3 * s, h - 1 * s, 4 * s, 1 * s, "#4169E118"))
+        parts.append(p(w - 10 * s, h - 1 * s, 5 * s, 1 * s, "#4169E118"))
 
         bg = render.Box(width = w, height = h, color = "#000000")
         frames.append(render.Stack(children = [bg] + parts))
