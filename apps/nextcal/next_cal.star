@@ -257,9 +257,14 @@ def get_calendar_bottom(data, scale, w):
         )
 
     elif data["shouldAnimateText"]:
+        summary_child = children[0]
+        on = [render.Text(data["copy"], color = data["textColor"], font = font) for _ in range(20)]
+        off = [render.Text(data["copy"], color = "#333", font = font) for _ in range(8)]
         children = [
-            render.Animation(
-                children,
+            summary_child,
+            render.Marquee(
+                width = w,
+                child = render.Animation(children = on + off),
             ),
         ]
 
